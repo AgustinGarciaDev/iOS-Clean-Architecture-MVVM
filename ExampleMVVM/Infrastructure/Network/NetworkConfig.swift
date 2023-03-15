@@ -1,24 +1,17 @@
-//
-//  AppConfiguration.swift
-//  RickAndMorty
-//
-//  Created by Agustinch on 06/02/2023.
-//
-
 import Foundation
 
-public protocol NetworkConfigurable {
+protocol NetworkConfigurable {
     var baseURL: URL { get }
     var headers: [String: String] { get }
     var queryParameters: [String: String] { get }
 }
 
-public struct ApiDataNetworkConfig: NetworkConfigurable {
-    public let baseURL: URL
-    public let headers: [String: String]
-    public let queryParameters: [String: String]
+struct ApiDataNetworkConfig: NetworkConfigurable {
+    let baseURL: URL
+    let headers: [String: String]
+    let queryParameters: [String: String]
     
-     public init(baseURL: URL,
+     init(baseURL: URL,
                  headers: [String: String] = [:],
                  queryParameters: [String: String] = [:]) {
         self.baseURL = baseURL

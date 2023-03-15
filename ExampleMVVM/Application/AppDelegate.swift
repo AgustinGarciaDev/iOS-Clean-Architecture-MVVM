@@ -1,10 +1,3 @@
-//
-//  AppDelegate.swift
-//  ExampleMVVM
-//
-//  Created by Oleh Kudinov on 01.10.18.
-//
-
 import UIKit
 
 @UIApplicationMain
@@ -14,7 +7,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var appFlowCoordinator: AppFlowCoordinator?
     var window: UIWindow?
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         
         AppAppearance.setupAppearance()
         
@@ -22,8 +18,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let navigationController = UINavigationController()
 
         window?.rootViewController = navigationController
-        appFlowCoordinator = AppFlowCoordinator(navigationController: navigationController,
-                                                appDIContainer: appDIContainer)
+        appFlowCoordinator = AppFlowCoordinator(
+            navigationController: navigationController,
+            appDIContainer: appDIContainer
+        )
         appFlowCoordinator?.start()
         window?.makeKeyAndVisible()
     

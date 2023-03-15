@@ -1,10 +1,3 @@
-//
-//  MoviesListViewModel.swift
-//  ExampleMVVM
-//
-//  Created by Oleh Kudinov on 01.10.18.
-//
-
 import Foundation
 
 struct MoviesListViewModelActions {
@@ -42,7 +35,7 @@ protocol MoviesListViewModelOutput {
     var searchBarPlaceholder: String { get }
 }
 
-protocol MoviesListViewModel: MoviesListViewModelInput, MoviesListViewModelOutput {}
+typealias MoviesListViewModel = MoviesListViewModelInput & MoviesListViewModelOutput
 
 final class DefaultMoviesListViewModel: MoviesListViewModel {
 
@@ -56,6 +49,7 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
 
     private var pages: [MoviesPage] = []
     private var moviesLoadTask: Cancellable? { willSet { moviesLoadTask?.cancel() } }
+    private let onMainThreadExecutor: OnMainThreadExecutor = DefaultOnMainThreadExecutor()
 
     // MARK: - OUTPUT
 
@@ -70,9 +64,11 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     let searchBarPlaceholder = NSLocalizedString("Search Movies", comment: "")
 
     // MARK: - Init
-
-    init(searchMoviesUseCase: SearchMoviesUseCase,
-         actions: MoviesListViewModelActions? = nil) {
+    
+    init(
+        searchMoviesUseCase: SearchMoviesUseCase,
+        actions: MoviesListViewModelActions? = nil
+    ) {
         self.searchMoviesUseCase = searchMoviesUseCase
         self.actions = actions
     }
@@ -103,15 +99,21 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
 
         moviesLoadTask = searchMoviesUseCase.execute(
             requestValue: .init(query: movieQuery, page: nextPage),
-            cached: appendPage,
-            completion: { result in
-                switch result {
-                case .success(let page):
-                    self.appendPage(page)
-                case .failure(let error):
-                    self.handle(error: error)
+            cached: { [weak self] page in
+                self?.onMainThreadExecutor.execute {
+                    self?.appendPage(page)
                 }
-                self.loading.value = .none
+            },
+            completion: { [weak self] result in
+                self?.onMainThreadExecutor.execute {
+                    switch result {
+                    case .success(let page):
+                        self?.appendPage(page)
+                    case .failure(let error):
+                        self?.handle(error: error)
+                    }
+                    self?.loading.value = .none
+                }
         })
     }
 

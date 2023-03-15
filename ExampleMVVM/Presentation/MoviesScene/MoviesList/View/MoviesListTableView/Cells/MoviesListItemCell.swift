@@ -1,10 +1,3 @@
-//
-//  MoviesListItemCell.swift
-//  ExampleMVVM
-//
-//  Created by Oleh Kudinov on 01.10.18.
-//
-
 import UIKit
 
 final class MoviesListItemCell: UITableViewCell {
@@ -20,8 +13,12 @@ final class MoviesListItemCell: UITableViewCell {
     private var viewModel: MoviesListItemViewModel!
     private var posterImagesRepository: PosterImagesRepository?
     private var imageLoadTask: Cancellable? { willSet { imageLoadTask?.cancel() } }
+    private let onMainThreadExecutor: OnMainThreadExecutor = DefaultOnMainThreadExecutor()
 
-    func fill(with viewModel: MoviesListItemViewModel, posterImagesRepository: PosterImagesRepository?) {
+    func fill(
+        with viewModel: MoviesListItemViewModel,
+        posterImagesRepository: PosterImagesRepository?
+    ) {
         self.viewModel = viewModel
         self.posterImagesRepository = posterImagesRepository
 
@@ -35,13 +32,17 @@ final class MoviesListItemCell: UITableViewCell {
         posterImageView.image = nil
         guard let posterImagePath = viewModel.posterImagePath else { return }
 
-        imageLoadTask = posterImagesRepository?.fetchImage(with: posterImagePath, width: width) { [weak self] result in
-            guard let self = self else { return }
-            guard self.viewModel.posterImagePath == posterImagePath else { return }
-            if case let .success(data) = result {
-                self.posterImageView.image = UIImage(data: data)
+        imageLoadTask = posterImagesRepository?.fetchImage(
+            with: posterImagePath,
+            width: width
+        ) { [weak self] result in
+            self?.onMainThreadExecutor.execute {
+                guard self?.viewModel.posterImagePath == posterImagePath else { return }
+                if case let .success(data) = result {
+                    self?.posterImageView.image = UIImage(data: data)
+                }
+                self?.imageLoadTask = nil
             }
-            self.imageLoadTask = nil
         }
     }
 }
