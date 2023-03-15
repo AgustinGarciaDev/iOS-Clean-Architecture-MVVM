@@ -1,10 +1,9 @@
 //
-//  NetworkService.swift
-//  ExampleMVVM
+//  AppConfiguration.swift
+//  RickAndMorty
 //
-//  Created by Oleh Kudinov on 01.10.18.
+//  Created by Agustinch on 06/02/2023.
 //
-
 import Foundation
 
 public enum NetworkError: Error {

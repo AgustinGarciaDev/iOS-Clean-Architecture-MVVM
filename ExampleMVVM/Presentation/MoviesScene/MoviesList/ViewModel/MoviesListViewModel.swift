@@ -86,7 +86,7 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
         pages = pages
             .filter { $0.page != moviesPage.page }
             + [moviesPage]
-
+        
         items.value = pages.movies.map(MoviesListItemViewModel.init)
     }
 
